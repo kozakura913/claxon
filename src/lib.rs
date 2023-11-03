@@ -183,7 +183,7 @@ pub struct FlacIntoSamples<R: ReadBytes> {
     inner: FlacSamples<R>,
 }
 
-fn read_stream_header<R: ReadBytes>(input: &mut R) -> Result<()> {
+pub fn read_stream_header<R: ReadBytes>(input: &mut R) -> Result<()> {
     // A FLAC stream starts with a 32-bit header 'fLaC' (big endian).
     const FLAC_HEADER: u32 = 0x66_4c_61_43;
 
@@ -304,6 +304,15 @@ impl<R: io::Read> FlacReader<R> {
         };
 
         Ok(flac_reader)
+    }
+
+    //pre-load by custom metadata loader
+    pub fn from_metadata(reader:BufferedReader<R>,streaminfo:StreamInfo) -> Self{
+        Self{
+            streaminfo:streaminfo,
+            vorbis_comment:None,
+            input: FlacReaderState::Full(reader),
+        }
     }
 
     /// Returns the streaminfo metadata.

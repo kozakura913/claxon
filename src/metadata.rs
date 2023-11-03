@@ -13,10 +13,10 @@ use std::str;
 use std::slice;
 
 #[derive(Clone, Copy)]
-struct MetadataBlockHeader {
-    is_last: bool,
-    block_type: u8,
-    length: u32,
+pub struct MetadataBlockHeader {
+    pub is_last: bool,
+    pub block_type: u8,
+    pub length: u32,
 }
 
 /// The streaminfo metadata block, with important information about the stream.
@@ -211,7 +211,7 @@ impl<'a> Iterator for GetTag<'a> {
 }
 
 #[inline]
-fn read_metadata_block_header<R: ReadBytes>(input: &mut R) -> Result<MetadataBlockHeader> {
+pub fn read_metadata_block_header<R: ReadBytes>(input: &mut R) -> Result<MetadataBlockHeader> {
     let byte = try!(input.read_u8());
 
     // The first bit specifies whether this is the last block, the next 7 bits
@@ -318,7 +318,7 @@ pub fn read_metadata_block<R: ReadBytes>(input: &mut R,
     }
 }
 
-fn read_streaminfo_block<R: ReadBytes>(input: &mut R) -> Result<StreamInfo> {
+pub fn read_streaminfo_block<R: ReadBytes>(input: &mut R) -> Result<StreamInfo> {
     let min_block_size = try!(input.read_be_u16());
     let max_block_size = try!(input.read_be_u16());
 
@@ -399,7 +399,7 @@ fn read_streaminfo_block<R: ReadBytes>(input: &mut R) -> Result<StreamInfo> {
     Ok(stream_info)
 }
 
-fn read_vorbis_comment_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<VorbisComment> {
+pub fn read_vorbis_comment_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<VorbisComment> {
     if length < 8 {
         // We expect at a minimum a 32-bit vendor string length, and a 32-bit
         // comment count.
@@ -512,7 +512,7 @@ fn read_vorbis_comment_block<R: ReadBytes>(input: &mut R, length: u32) -> Result
     Ok(vorbis_comment)
 }
 
-fn read_padding_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<()> {
+pub fn read_padding_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<()> {
     // The specification dictates that all bits of the padding block must be 0.
     // However, the reference implementation does not issue an error when this
     // is not the case, and frankly, when you are going to skip over these
@@ -521,7 +521,7 @@ fn read_padding_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<()> {
     Ok(try!(input.skip(length)))
 }
 
-fn read_application_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<(u32, Vec<u8>)> {
+pub fn read_application_block<R: ReadBytes>(input: &mut R, length: u32) -> Result<(u32, Vec<u8>)> {
     if length < 4 {
         return fmt_err("application block length must be at least 4 bytes")
     }
